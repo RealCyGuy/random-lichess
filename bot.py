@@ -90,7 +90,7 @@ class Game(threading.Thread):
                 self.client.bots.post_message(
                     self.game_id, random.choice(self.greetings)
                 )
-                if event["white"]["id"] == username.lower():
+                if event["white"].get("id", None) == username.lower():
                     self.white = True
                     self.move()
                 if event["initialFen"] != "startpos":
