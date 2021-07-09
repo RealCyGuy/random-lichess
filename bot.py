@@ -37,11 +37,31 @@ class Game(threading.Thread):
             "Good luck and have fun.",
             "Fine, I'll go easy this time.",
             "Sometimes good moves look random, you just have to look deeper.",
-            "\"Every chess master was once a beginner.\" – Irving Chernev",
-            "\"I don’t believe in psychology. I believe in good moves.\" – Bobby Fischer",
-            "\"Nobody ever won a chess game by resigning.\" – Savielly Tartakower",
-            "\"The pin is mightier than the sword.\" – Fred Reinfeld",
-            "Just believe in yourself, you can do it!"
+            '"Every chess master was once a beginner." – Irving Chernev',
+            '"I don’t believe in psychology. I believe in good moves." – Bobby Fischer',
+            '"Nobody ever won a chess game by resigning." – Savielly Tartakower',
+            '"The pin is mightier than the sword." – Fred Reinfeld',
+            "Just believe in yourself, you can do it!",
+            "jayme is cool (i was forced to write this, he actually is less than cool)",
+        ]
+        self.adjectives = [
+            "GOOD",
+            "GREAT",
+            "EXCELLENT",
+            "AMAZING",
+            "BRILLIANT",
+            "WONDERFUL",
+            "RIVETING",
+            "TERRIFIC",
+            "NOT BAD",
+            "DELICIOUS",
+            "MARVELOUS",
+            "ADMIRABLE",
+            "SCRUMPTIOUS",
+            "SUCCULENT",
+            "WICKED",
+            "TREMENDOUS",
+            "YUMMY"
         ]
 
     def move(self):
@@ -55,7 +75,8 @@ class Game(threading.Thread):
             if event["type"] == "gameState":
                 if event["status"] != "started":
                     self.client.bots.post_message(
-                        self.game_id, "GREAT game, well played."
+                        self.game_id,
+                        random.choice(self.adjectives) + " game, well played.",
                     )
                     sys.exit()
                 try:
@@ -64,7 +85,9 @@ class Game(threading.Thread):
                     continue
                 self.move()
             elif event["type"] == "gameFull":
-                self.client.bots.post_message(self.game_id, random.choice(self.greetings))
+                self.client.bots.post_message(
+                    self.game_id, random.choice(self.greetings)
+                )
                 if event["white"]["id"] == username.lower():
                     self.move()
                 if event["initialFen"] != "startpos":
@@ -79,7 +102,8 @@ for event in client.bots.stream_incoming_events():
         if event["challenge"]["challenger"]["id"] == username.lower():
             continue
         if (
-            event["challenge"]["variant"]["key"] == "standard" or event["challenge"]["variant"]["key"] == "fromPosition"
+            event["challenge"]["variant"]["key"] == "standard"
+            or event["challenge"]["variant"]["key"] == "fromPosition"
             and event["challenge"]["rated"] is False
             and event["challenge"]["speed"] != "correspondence"
         ):
