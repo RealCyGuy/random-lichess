@@ -63,6 +63,7 @@ class Game(threading.Thread):
             "TREMENDOUS",
             "YUMMY"
         ]
+        self.white = False
 
     def move(self):
         move = random.choice(list(self.board.generate_legal_moves()))
@@ -83,12 +84,14 @@ class Game(threading.Thread):
                     self.board.push_uci(event["moves"].split(" ")[-1])
                 except ValueError:
                     continue
-                self.move()
+                if self.board.turn == self.white:
+                    self.move()
             elif event["type"] == "gameFull":
                 self.client.bots.post_message(
                     self.game_id, random.choice(self.greetings)
                 )
                 if event["white"]["id"] == username.lower():
+                    self.white = True
                     self.move()
                 if event["initialFen"] != "startpos":
                     self.board.set_fen(event["initialFen"])
