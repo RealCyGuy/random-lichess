@@ -61,7 +61,7 @@ class Game(threading.Thread):
             "SUCCULENT",
             "WICKED",
             "TREMENDOUS",
-            "YUMMY"
+            "YUMMY",
         ]
         self.white = False
 
@@ -105,8 +105,10 @@ for event in client.bots.stream_incoming_events():
         if event["challenge"]["challenger"]["id"] == username.lower():
             continue
         if (
-            event["challenge"]["variant"]["key"] == "standard"
-            or event["challenge"]["variant"]["key"] == "fromPosition"
+            (
+                event["challenge"]["variant"]["key"] == "standard"
+                or event["challenge"]["variant"]["key"] == "fromPosition"
+            )
             and event["challenge"]["rated"] is False
             and event["challenge"]["speed"] != "correspondence"
         ):
