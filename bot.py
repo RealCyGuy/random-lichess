@@ -43,6 +43,17 @@ class Game(threading.Thread):
             '"The pin is mightier than the sword." – Fred Reinfeld',
             "Just believe in yourself, you can do it!",
             "jayme is cool (i was forced to write this, he actually is less than cool)",
+            "Let's try our hardest, okay?",
+            '"When you see a good move, look for a better one." - Emanuel Lasker',
+            "It's okay, you'll win soon enough.",
+            "No hard feelings, okay?",
+            "Let me tell you a secret... I'm not actually a grandmaster... Don't tell anyone!",
+            "Chess is too easy.",
+            "Rolling a die: " + str(random.randint(1, 6)),
+            "I have a " + str(random.randint(1, 99)) + "% chance of winning.",
+            '"If you are allergic to a thing, it is best not to put that thing in your mouth, particularly if the thing is cats." - Lemony Snicket',
+            "Good luck. Not that it'll help...",
+            "no i don't",
         ]
         self.adjectives = [
             "GOOD",
