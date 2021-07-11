@@ -5,6 +5,7 @@ import random
 import time
 
 import berserk
+import berserk.exceptions
 from dotenv import load_dotenv
 import chess
 
@@ -137,21 +138,24 @@ class AutoChallenge(threading.Thread):
             "GarboBot",
             "MiniHuman",
             "WeiaWaga",
-            "LazyBot",
-            "BabiBot",
-            "DeepChessEngine",
             "WorstFish",
             "WeirdChessBot",
             "CaptureBot",
-            "TuksuBot"
+            "TuksuBot",
+            "ResoluteBot",
+            "bot_adario",
+            "Nakshatra3",
+            "RootEngine",
+            "XXIstCentury"
         ]
 
     def run(self):
         while True:
-            clock = 180
-            bot = random.choice(self.bots)
-            self.client.challenges.create(bot, False, clock, 0)
-            time.sleep(30)
+            try:
+                self.client.challenges.create(random.choice(self.bots), False, 180, 0)
+            except berserk.exceptions.ResponseError as e:
+                print(e)
+            time.sleep(360)
 
 
 AutoChallenge(client).start()
