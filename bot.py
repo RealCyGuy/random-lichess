@@ -141,18 +141,15 @@ class AutoChallenge(threading.Thread):
             "BabiBot",
             "DeepChessEngine",
             "WorstFish",
-            "#WeirdChessBot",
-            "#CaptureBot",
-            "#TuksuBot"
+            "WeirdChessBot",
+            "CaptureBot",
+            "TuksuBot"
         ]
 
     def run(self):
         while True:
             clock = 180
             bot = random.choice(self.bots)
-            if bot.startswith("#"):
-                bot = bot[1:]
-                clock = 30
             self.client.challenges.create(bot, False, clock, 0)
             time.sleep(30)
 
