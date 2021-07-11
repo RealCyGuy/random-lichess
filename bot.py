@@ -7,10 +7,12 @@ import berserk
 from dotenv import load_dotenv
 import chess
 
+import clients
+
 load_dotenv()
 
 session = berserk.TokenSession(os.environ.get("API_TOKEN", None))
-client = berserk.Client(session=session)
+client = clients.Client(session=session)
 print("random-lichess by cyrus yip")
 username = client.account.get()["username"]
 print("Connected as", username + "!")
@@ -85,16 +87,25 @@ class Game(threading.Thread):
         for event in self.stream:
             print(event)
             if event["type"] == "gameState":
+                try:
+                    self.board.push_uci(event["moves"].split(" ")[-1])
+                except ValueError:
+                    continue
                 if event["status"] != "started":
                     self.client.bots.post_message(
                         self.game_id,
                         random.choice(self.adjectives) + " game, well played.",
                     )
+                    if "winner" not in event:
+                        msg = "That was tough one, shame it ended in a draw."
+                    elif (event["winner"] == "white") == self.white:
+                        msg = "Another nice and clean win."
+                    else:
+                        msg = "What a tough opponent, got me with a rare defeat."
+                    self.client.bots.post_message(
+                        self.game_id, msg + " Have fun in analysis!", True,
+                    )
                     sys.exit()
-                try:
-                    self.board.push_uci(event["moves"].split(" ")[-1])
-                except ValueError:
-                    continue
                 if self.board.turn == self.white:
                     self.move()
             elif event["type"] == "gameFull":
@@ -106,8 +117,6 @@ class Game(threading.Thread):
                     self.move()
                 if event["initialFen"] != "startpos":
                     self.board.set_fen(event["initialFen"])
-            elif event["type"] == "gameFinish":
-                sys.exit()
 
 
 for event in client.bots.stream_incoming_events():
@@ -115,17 +124,19 @@ for event in client.bots.stream_incoming_events():
     if event["type"] == "challenge":
         if event["challenge"]["challenger"]["id"] == username.lower():
             continue
-        if (
-            (
-                event["challenge"]["variant"]["key"] == "standard"
-                or event["challenge"]["variant"]["key"] == "fromPosition"
-            )
-            and event["challenge"]["rated"] is False
-            and event["challenge"]["speed"] != "correspondence"
+        if not (
+            event["challenge"]["variant"]["key"] == "standard"
+            or event["challenge"]["variant"]["key"] == "fromPosition"
         ):
-            client.bots.accept_challenge(event["challenge"]["id"])
+            reason = "variant"
+        elif event["challenge"]["rated"] is True:
+            reason = "casual"
+        elif event["challenge"]["speed"] == "correspondence":
+            reason = "tooSlow"
         else:
-            client.bots.decline_challenge(event["challenge"]["id"])
+            client.bots.accept_challenge(event["challenge"]["id"])
+            continue
+        client.bots.decline_challenge(event["challenge"]["id"], reason)
     elif event["type"] == "gameStart":
         game = Game(client, event["game"]["id"])
         game.start()
