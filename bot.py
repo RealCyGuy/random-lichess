@@ -87,10 +87,6 @@ class Game(threading.Thread):
         for event in self.stream:
             print(event)
             if event["type"] == "gameState":
-                try:
-                    self.board.push_uci(event["moves"].split(" ")[-1])
-                except ValueError:
-                    continue
                 if event["status"] != "started":
                     self.client.bots.post_message(
                         self.game_id,
@@ -106,6 +102,10 @@ class Game(threading.Thread):
                         self.game_id, msg + " Have fun in analysis!", True,
                     )
                     sys.exit()
+                try:
+                    self.board.push_uci(event["moves"].split(" ")[-1])
+                except ValueError:
+                    continue
                 if self.board.turn == self.white:
                     self.move()
             elif event["type"] == "gameFull":
@@ -115,6 +115,8 @@ class Game(threading.Thread):
                 if event["white"].get("id", None) == username.lower():
                     self.white = True
                     self.move()
+                if event["variant"]["key"] == "chess960":
+                    self.board.chess960 = True
                 if event["initialFen"] != "startpos":
                     self.board.set_fen(event["initialFen"])
 
@@ -127,6 +129,7 @@ for event in client.bots.stream_incoming_events():
         if not (
             event["challenge"]["variant"]["key"] == "standard"
             or event["challenge"]["variant"]["key"] == "fromPosition"
+            or event["challenge"]["variant"]["key"] == "chess960"
         ):
             reason = "variant"
         elif event["challenge"]["rated"] is True:
