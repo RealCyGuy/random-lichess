@@ -2,6 +2,7 @@ import os
 import sys
 import threading
 import random
+import time
 
 import berserk
 from dotenv import load_dotenv
@@ -19,7 +20,7 @@ print("Connected as", username + "!")
 
 
 class Game(threading.Thread):
-    def __init__(self, client, game_id, **kwargs):
+    def __init__(self, client: clients.Client, game_id, **kwargs):
         super().__init__(**kwargs)
         self.game_id = game_id
         self.client = client
@@ -121,6 +122,42 @@ class Game(threading.Thread):
                     self.board.set_fen(event["initialFen"])
 
 
+class AutoChallenge(threading.Thread):
+    def __init__(self, client: clients.Client):
+        super().__init__()
+        self.client = client
+        self.bots = [
+            "Boris-Trapsky",
+            "TinezzBot_v2",
+            "PlayChessTonight",
+            "LeelaStrength",
+            "Flagfish",
+            "simpleEval",
+            "FlamingDragon_9000",
+            "GarboBot",
+            "MiniHuman",
+            "WeiaWaga",
+            "LazyBot",
+            "BabiBot",
+            "DeepChessEngine",
+            "WorstFish",
+            "#WeirdChessBot",
+            "#CaptureBot",
+            "#TuksuBot"
+        ]
+
+    def run(self):
+        while True:
+            clock = 180
+            bot = random.choice(self.bots)
+            if bot.startswith("#"):
+                bot = bot[1:]
+                clock = 30
+            self.client.challenges.create(bot, False, clock, 0)
+            time.sleep(30)
+
+
+AutoChallenge(client).start()
 for event in client.bots.stream_incoming_events():
     print(event)
     if event["type"] == "challenge":
