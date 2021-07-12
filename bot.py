@@ -79,12 +79,21 @@ class Game(threading.Thread):
             "YUMMY",
         ]
         self.white = False
+        self.retry_delay = 0
 
-    def move(self):
-        if self.board.turn == self.white:
-            move = random.choice(list(self.board.generate_legal_moves()))
-            self.board.push(move)
-            self.client.bots.make_move(self.game_id, move.uci())
+    def move(self, retries_left=3, move=None):
+        if self.board.turn == self.white or move:
+            try:
+                if not move:
+                    move = random.choice(list(self.board.generate_legal_moves()))
+                    self.board.push(move)
+                self.client.bots.make_move(self.game_id, move.uci())
+            except Exception as e:
+                if retries_left > 0:
+                    retry = 4 - retries_left
+                    time.sleep(retry + self.retry_delay)
+                    print(f"Retry {retry}:", e)
+                    self.move(retries_left-1, move)
 
     def run(self):
         for event in self.stream:
@@ -114,6 +123,22 @@ class Game(threading.Thread):
                 self.client.bots.post_message(
                     self.game_id, random.choice(self.greetings)
                 )
+                initial = event["clock"]["initial"] / 60000
+                increment = event["clock"]["increment"] / 1000
+                if initial >= 15 or (increment >= 60 and initial >= 2):
+                    self.retry_delay = 50
+                elif initial >= 10 or (increment >= 45 and initial >= 1.5):
+                    self.retry_delay = 40
+                elif initial >= 5 or (increment >= 30 and initial >= 1.5):
+                    self.retry_delay = 30
+                elif initial >= 3 or (increment >= 10 and initial >= 1):
+                    self.retry_delay = 15
+                elif initial >= 2 or (increment >= 1 and initial >= 1):
+                    self.retry_delay = 10
+                elif initial >= 1:
+                    self.retry_delay = 3
+                elif initial >= 0.75:
+                    self.retry_delay = 1
                 if event["variant"]["key"] == "chess960":
                     self.board.chess960 = True
                 if event["initialFen"] != "startpos":
