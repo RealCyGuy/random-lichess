@@ -81,9 +81,10 @@ class Game(threading.Thread):
         self.white = False
 
     def move(self):
-        move = random.choice(list(self.board.generate_legal_moves()))
-        self.board.push(move)
-        self.client.bots.make_move(self.game_id, move.uci())
+        if self.board.turn == self.white:
+            move = random.choice(list(self.board.generate_legal_moves()))
+            self.board.push(move)
+            self.client.bots.make_move(self.game_id, move.uci())
 
     def run(self):
         for event in self.stream:
@@ -108,19 +109,21 @@ class Game(threading.Thread):
                     self.board.push_uci(event["moves"].split(" ")[-1])
                 except ValueError:
                     continue
-                if self.board.turn == self.white:
-                    self.move()
+                self.move()
             elif event["type"] == "gameFull":
                 self.client.bots.post_message(
                     self.game_id, random.choice(self.greetings)
                 )
-                if event["white"].get("id", None) == username.lower():
-                    self.white = True
-                    self.move()
                 if event["variant"]["key"] == "chess960":
                     self.board.chess960 = True
                 if event["initialFen"] != "startpos":
                     self.board.set_fen(event["initialFen"])
+                if event["state"]["moves"]:
+                    for move in event["state"]["moves"].split(" "):
+                        self.board.push_uci(move)
+                if event["white"].get("id", None) == username.lower():
+                    self.white = True
+                self.move()
 
 
 class AutoChallenge(threading.Thread):
