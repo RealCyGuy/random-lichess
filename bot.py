@@ -155,7 +155,7 @@ class AutoChallenge(threading.Thread):
                 self.client.challenges.create(random.choice(self.bots), False, 180, 0)
             except berserk.exceptions.ResponseError as e:
                 print(e)
-            time.sleep(360)
+            time.sleep(3600)
 
 
 AutoChallenge(client).start()
