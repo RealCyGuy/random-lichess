@@ -186,7 +186,8 @@ class AutoChallenge(threading.Thread):
             time.sleep(3600)
 
 
-AutoChallenge(client).start()
+if os.environ.get("DISABLE_AUTOCHALLENGE") != "true":
+    AutoChallenge(client).start()
 for event in client.bots.stream_incoming_events():
     print(event)
     try:
