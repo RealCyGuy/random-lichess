@@ -188,28 +188,32 @@ class AutoChallenge(threading.Thread):
 
 if os.environ.get("DISABLE_AUTOCHALLENGE") != "true":
     AutoChallenge(client).start()
-for event in client.bots.stream_incoming_events():
-    print(event)
+while True:
     try:
-        if event["type"] == "challenge":
-            if event["challenge"]["challenger"]["id"] == username.lower():
-                continue
-            if not (
-                event["challenge"]["variant"]["key"] == "standard"
-                or event["challenge"]["variant"]["key"] == "fromPosition"
-                or event["challenge"]["variant"]["key"] == "chess960"
-            ):
-                reason = "variant"
-            elif event["challenge"]["rated"] is True:
-                reason = "casual"
-            elif event["challenge"]["speed"] == "correspondence":
-                reason = "tooSlow"
-            else:
-                client.bots.accept_challenge(event["challenge"]["id"])
-                continue
-            client.bots.decline_challenge(event["challenge"]["id"], reason)
-        elif event["type"] == "gameStart":
-            game = Game(client, event["game"]["id"])
-            game.start()
+        for event in client.bots.stream_incoming_events():
+            print(event)
+            try:
+                if event["type"] == "challenge":
+                    if event["challenge"]["challenger"]["id"] == username.lower():
+                        continue
+                    if not (
+                        event["challenge"]["variant"]["key"] == "standard"
+                        or event["challenge"]["variant"]["key"] == "fromPosition"
+                        or event["challenge"]["variant"]["key"] == "chess960"
+                    ):
+                        reason = "variant"
+                    elif event["challenge"]["rated"] is True:
+                        reason = "casual"
+                    elif event["challenge"]["speed"] == "correspondence":
+                        reason = "tooSlow"
+                    else:
+                        client.bots.accept_challenge(event["challenge"]["id"])
+                        continue
+                    client.bots.decline_challenge(event["challenge"]["id"], reason)
+                elif event["type"] == "gameStart":
+                    game = Game(client, event["game"]["id"])
+                    game.start()
+            except Exception as e:
+                print("Event handling error:", e)
     except Exception as e:
-        print("Ignoring exception:", e)
+        print("Main loop error:", e)
