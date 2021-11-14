@@ -204,7 +204,7 @@ while True:
                         reason = "variant"
                     elif event["challenge"]["rated"] is True:
                         reason = "casual"
-                    elif event["challenge"]["speed"] == "correspondence":
+                    elif event["challenge"]["timeControl"]["type"] == "unlimited":
                         reason = "tooSlow"
                     else:
                         client.bots.accept_challenge(event["challenge"]["id"])
