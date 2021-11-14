@@ -123,22 +123,25 @@ class Game(threading.Thread):
                 self.client.bots.post_message(
                     self.game_id, random.choice(self.greetings)
                 )
-                initial = event["clock"]["initial"] / 60000
-                increment = event["clock"]["increment"] / 1000
-                if initial >= 15 or (increment >= 60 and initial >= 2):
-                    self.retry_delay = 50
-                elif initial >= 10 or (increment >= 45 and initial >= 1.5):
-                    self.retry_delay = 40
-                elif initial >= 5 or (increment >= 30 and initial >= 1.5):
-                    self.retry_delay = 30
-                elif initial >= 3 or (increment >= 10 and initial >= 1):
-                    self.retry_delay = 15
-                elif initial >= 2 or (increment >= 1 and initial >= 1):
-                    self.retry_delay = 10
-                elif initial >= 1:
-                    self.retry_delay = 3
-                elif initial >= 0.75:
-                    self.retry_delay = 1
+                if event["clock"]:
+                    initial = event["clock"]["initial"] / 60000
+                    increment = event["clock"]["increment"] / 1000
+                    if initial >= 15 or (increment >= 60 and initial >= 2):
+                        self.retry_delay = 50
+                    elif initial >= 10 or (increment >= 45 and initial >= 1.5):
+                        self.retry_delay = 40
+                    elif initial >= 5 or (increment >= 30 and initial >= 1.5):
+                        self.retry_delay = 30
+                    elif initial >= 3 or (increment >= 10 and initial >= 1):
+                        self.retry_delay = 15
+                    elif initial >= 2 or (increment >= 1 and initial >= 1):
+                        self.retry_delay = 10
+                    elif initial >= 1:
+                        self.retry_delay = 3
+                    elif initial >= 0.75:
+                        self.retry_delay = 1
+                else:
+                    self.retry_delay = 60
                 if event["variant"]["key"] == "chess960":
                     self.board.chess960 = True
                 if event["initialFen"] != "startpos":
